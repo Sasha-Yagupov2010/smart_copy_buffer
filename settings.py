@@ -1,12 +1,63 @@
 # Константы и настройки приложения
 MAX_HISTORY_SIZE = 100
 HISTORY_FILE = "clipboard_history.txt"
+SCRIPT_BINDINGS_FILE = "script_bindings.json"
 
 # Настройки тем
 DARK_THEME_STYLESHEET = """
     QMainWindow {
         background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
             stop:0 #1e3c72, stop:1 #2a5298);
+    }
+    QTabWidget::pane {
+        border: 1px solid rgba(255, 255, 255, 50);
+        background: rgba(255, 255, 255, 20);
+        border-radius: 8px;
+    }
+    QTabBar::tab {
+        background: rgba(255, 255, 255, 30);
+        border: 1px solid rgba(255, 255, 255, 50);
+        padding: 8px 12px;
+        margin: 2px;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        color: white;
+        font-weight: bold;
+    }
+    QTabBar::tab:selected {
+        background: rgba(74, 144, 226, 150);
+    }
+    QGroupBox {
+        border: 2px solid rgba(255, 255, 255, 50);
+        border-radius: 8px;
+        margin-top: 10px;
+        padding-top: 10px;
+        color: white;
+        font-weight: bold;
+    }
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        subcontrol-position: top center;
+        padding: 0 5px;
+        background: transparent;
+    }
+    QTextEdit, QLineEdit {
+        background: rgba(255, 255, 255, 20);
+        border: 2px solid rgba(255, 255, 255, 50);
+        border-radius: 6px;
+        padding: 5px;
+        color: white;
+        font-size: 12px;
+    }
+    QComboBox {
+        background: rgba(255, 255, 255, 20);
+        border: 2px solid rgba(255, 255, 255, 50);
+        border-radius: 6px;
+        padding: 5px;
+        color: white;
+    }
+    QComboBox::drop-down {
+        border: none;
     }
     QListWidget {
         background: rgba(255, 255, 255, 20);
@@ -83,6 +134,54 @@ LIGHT_THEME_STYLESHEET = """
     QMainWindow {
         background: qlineargradient(x1:0, y1:0, x2:1, y2:1,
             stop:0 #e3f2fd, stop:1 #bbdefb);
+    }
+    QTabWidget::pane {
+        border: 1px solid #90caf9;
+        background: white;
+        border-radius: 8px;
+    }
+    QTabBar::tab {
+        background: #f5f5f5;
+        border: 1px solid #90caf9;
+        padding: 8px 12px;
+        margin: 2px;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        color: #333;
+        font-weight: bold;
+    }
+    QTabBar::tab:selected {
+        background: #2196f3;
+        color: white;
+    }
+    QGroupBox {
+        border: 2px solid #90caf9;
+        border-radius: 8px;
+        margin-top: 10px;
+        padding-top: 10px;
+        color: #333;
+        font-weight: bold;
+    }
+    QGroupBox::title {
+        subcontrol-origin: margin;
+        subcontrol-position: top center;
+        padding: 0 5px;
+        background: transparent;
+    }
+    QTextEdit, QLineEdit {
+        background: white;
+        border: 2px solid #90caf9;
+        border-radius: 6px;
+        padding: 5px;
+        color: #333;
+        font-size: 12px;
+    }
+    QComboBox {
+        background: white;
+        border: 2px solid #90caf9;
+        border-radius: 6px;
+        padding: 5px;
+        color: #333;
     }
     QListWidget {
         background: white;
@@ -166,44 +265,3 @@ HOTKEYS = {
 # Настройки мониторинга буфера обмена
 CLIPBOARD_CHECK_INTERVAL = 300  # мс
 COPY_DELAY = 0.05  # с
-
-# Импорты для класса кнопки
-from PySide6.QtWidgets import QPushButton
-from PySide6.QtCore import QPropertyAnimation, QEasingCurve, QRect, Qt
-
-class AnimatedButton(QPushButton):
-    """Анимированная кнопка с эффектом нажатия"""
-    def __init__(self, text, parent=None):
-        super().__init__(text, parent)
-        self._animation = QPropertyAnimation(self, b"geometry")
-        self._animation.setDuration(ANIMATION_DURATION)
-        self._animation.setEasingCurve(QEasingCurve.OutCubic)
-        
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            original_geometry = self.geometry()
-            self._animation.setStartValue(original_geometry)
-            self._animation.setEndValue(QRect(
-                original_geometry.x() + 2,
-                original_geometry.y() + 2,
-                original_geometry.width() - 4,
-                original_geometry.height() - 4
-            ))
-            self._animation.start()
-        
-        super().mousePressEvent(event)
-    
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            self._animation.setDirection(QPropertyAnimation.Backward)
-            self._animation.start()
-        
-        super().mouseReleaseEvent(event)
-
-def get_theme_stylesheet(is_dark_theme):
-    """Возвращает стиль для выбранной темы"""
-    return DARK_THEME_STYLESHEET if is_dark_theme else LIGHT_THEME_STYLESHEET
-
-def get_status_color(message_type):
-    """Возвращает цвет для типа сообщения"""
-    return STATUS_COLORS.get(message_type, "#2196F3")
