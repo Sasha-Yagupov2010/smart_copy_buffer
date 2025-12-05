@@ -193,18 +193,22 @@ class ScriptManager:
         """Возвращает все привязки"""
         return self.script_bindings
 
+
 class AddScriptDialog(QDialog):
     """Диалог добавления привязки скрипта"""
-    def __init__(self, parent=None):
+
+    def __init__(self, parent=None, is_dark_theme=True):
         super().__init__(parent)
+        self.is_dark_theme = is_dark_theme
         self.setWindowTitle("Добавить привязку файла")
         self.setModal(True)
         self.resize(500, 150)
         self.setup_ui()
-    
+        self.apply_theme()
+
     def setup_ui(self):
         layout = QVBoxLayout(self)
-        
+
         # Горячая клавиша
         hotkey_layout = QHBoxLayout()
         hotkey_layout.addWidget(QLabel("Горячая клавиша:"))
@@ -212,36 +216,40 @@ class AddScriptDialog(QDialog):
         self.hotkey_edit.setPlaceholderText("например: ctrl+alt+1")
         hotkey_layout.addWidget(self.hotkey_edit)
         layout.addLayout(hotkey_layout)
-        
+
         # Выбор файла
         file_layout = QHBoxLayout()
         file_layout.addWidget(QLabel("Файл для запуска:"))
         self.file_edit = QLineEdit()
         self.file_edit.setPlaceholderText("Выберите файл...")
         file_layout.addWidget(self.file_edit)
-        
+
         self.browse_btn = QPushButton("Обзор...")
         self.browse_btn.clicked.connect(self.browse_file)
         file_layout.addWidget(self.browse_btn)
         layout.addLayout(file_layout)
-        
+
         # Кнопки
         button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         button_box.accepted.connect(self.accept)
         button_box.rejected.connect(self.reject)
         layout.addWidget(button_box)
-    
+
+    def apply_theme(self):
+        """Применяет тему к диалогу"""
+        self.setStyleSheet(get_theme_stylesheet(self.is_dark_theme))
+
     def browse_file(self):
         """Открывает диалог выбора файла"""
         file_path, _ = QFileDialog.getOpenFileName(
-            self, 
-            "Выберите файл для запуска", 
-            "", 
+            self,
+            "Выберите файл для запуска",
+            "",
             "All Files (*);;Python Files (*.py);;Batch Files (*.bat);;Executable Files (*.exe)"
         )
         if file_path:
             self.file_edit.setText(file_path)
-    
+
     def get_data(self):
         """Возвращает данные из диалога"""
         return {
@@ -401,7 +409,7 @@ class ClipboardManager(QMainWindow):
     
     def add_script_binding(self):
         """Добавляет новую привязку"""
-        dialog = AddScriptDialog(self)
+        dialog = AddScriptDialog(self, False)  # Передаем тему
         if dialog.exec() == QDialog.Accepted:
             data = dialog.get_data()
             hotkey = data['hotkey']
